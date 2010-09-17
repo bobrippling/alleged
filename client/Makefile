@@ -8,7 +8,7 @@ TMPDIR    = alleg
 .PHONY: clean mostlyclean dist
 
 
-${BIN}: main.o phyobj.o ball.o
+${BIN}: main.o phyobj.o netobj.o jet.o
 	$Qecho LD $@
 	$Q${CXX} ${LDFLAGS} -o $@ $^
 
@@ -24,9 +24,24 @@ mostlyclean:
 
 dist:
 	@mkdir -p ${TMPDIR}
-	@cp ball_24.bmp ball.cpp ball.h main.cpp \
-		Makefile TODO ${TMPDIR}
+	@cp -R \
+			jet_24.bmp \
+			jet.cpp \
+			jet.h \
+			main.cpp \
+			Makefile \
+			netobj.cpp \
+			netobj.h \
+			phyobj.cpp \
+			phyobj.h \
+			svr.c \
+			${TMPDIR}
 	@rm -f ${TMPDIR}.tar.bz2
 	@tar cf ${TMPDIR}.tar ${TMPDIR}
 	@rm -r ${TMPDIR}
 	@bzip2 ${TMPDIR}.tar
+
+jet.o: jet.cpp phyobj.h netobj.h jet.h
+main.o: main.cpp netobj.h phyobj.h jet.h
+netobj.o: netobj.cpp netobj.h
+phyobj.o: phyobj.cpp phyobj.h

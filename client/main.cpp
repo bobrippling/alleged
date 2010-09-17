@@ -1,31 +1,37 @@
 #include <cstdio>
 #include <cstdlib>
-#include <allegro.h>
 #include <cerrno>
 #include <cmath>
+#include <vector>
+
+#include <allegro.h>
+#include <arpa/inet.h>
 
 #define WIDTH 800
 #define HEIGHT 600
 
 #define FRAME_DELAY 60
-#define NBALLS 5
+#define Njets 5
 
-#define FILE_BALL "ball_24.bmp"
+#define JET_FILE "img/jet.bmp"
+#define JET_SPEED 5.0f
 
-#define BALL_SPEED 5.0f
-
+#include "netobj.h"
 #include "phyobj.h"
-#include "ball.h"
+#include "jet.h"
 
-Ball *balls[NBALLS];
+
+Jet *jetMe;
+std::vector<Jet> jets;
+
 bool running = true;
 volatile long timer = 0; /* fps business */
 
 int lewp(void);
 void timerfunc(void);
 
-int  initballs(void);
-void termballs(void);
+int  initjets(void);
+void termjets(void);
 
 void handler_close(void);
 
@@ -40,7 +46,6 @@ END_OF_FUNCTION(timerfunc)
 int lewp(void)
 {
 	BITMAP *buffer = create_bitmap(WIDTH, HEIGHT); /* backbuffer */
-	int i;
 
 	clear_bitmap(buffer);
 	clear_bitmap(screen);
@@ -52,25 +57,28 @@ int lewp(void)
 		 */
 
 		while(timer > 0){
-			/* logic here */
-			for(i = 0; i < NBALLS; i++)
-				balls[i]->move(WIDTH, HEIGHT);
+			std::vector<Jet>::iterator it(jets.begin());
+
+			/* logic code */
+			jetMe->move(WIDTH, HEIGHT);
+
+			for(std::vector<Jet>::iterator it = jets.begin();
+					it != jets.end();
+					++it)
+				(*it).move(WIDTH, HEIGHT);
 
 			timer--;
 		}
 
-		/* draw here */
-		/*
-		line(buffer, 250, 250, 350, 350, makecol(255, 255, 255));
-		circle(buffer, 250, 250, 500, makecol(255, 255, 255));
-		*/
 
-		for(i = 0; i < NBALLS; i++){
-			draw_sprite(buffer, balls[i]->bmp(), balls[i]->x(), balls[i]->y());
+		/* draw code */
+		jetMe->draw(buffer);
 
-			/* bmp, font, x, y, col, transparency, str, ... */
-			textprintf_centre_ex(buffer, font, balls[i]->x(), balls[i]->y(), balls[i]->col(), -1, "balls[%d]", i);
-		}
+		for(std::vector<Jet>::iterator it = jets.begin();
+				it != jets.end();
+				++it)
+			(*it).draw(buffer);
+
 
 		blit(buffer, screen, 0, 0, 0, 0, WIDTH, HEIGHT);
 		clear_bitmap(buffer);
@@ -80,37 +88,29 @@ int lewp(void)
 	return 0;
 }
 
-int initballs()
+int initjets()
 {
-	int i;
 	BITMAP *tmpbmp;
 
-	if(access(FILE_BALL, F_OK) == -1){
-		allegro_message("access(): "FILE_BALL": %s\n", strerror(errno));
+	if(access(JET_FILE, F_OK) == -1){
+		allegro_message("access(): " JET_FILE ": %s\n", strerror(errno));
 		return 1;
 	}
 
-	for(i = 0; i < NBALLS; i++){
-		tmpbmp = load_bitmap(FILE_BALL, NULL /* pallete */);
-		if(!tmpbmp){
-			allegro_message("load_bitmap(): %s: %s", FILE_BALL, errno ? strerror(errno) : "unknown error");
-			while(i > 0)
-				delete balls[--i];
-			return 1;
-		}
-
-		balls[i] = new Ball(rand() % WIDTH, rand() % HEIGHT,
-				BALL_SPEED, (rand() % 360) * M_PI/180, tmpbmp, makecol(0, 255, 0));
+	if(!(tmpbmp = load_bitmap(JET_FILE, NULL))){
+		perror("load_bitmap("JET_FILE")");
+		return 1;
 	}
+
+	jetMe = new Jet(rand() % WIDTH, rand() % HEIGHT,
+			JET_SPEED, (rand() % 360) * M_PI/180, tmpbmp, makecol(0, 255, 0), NULL);
 
 	return 0;
 }
 
-void termballs()
+void termjets()
 {
-	int i;
-	for(i = 0; i < NBALLS; i++)
-		delete balls[i];
+	delete jetMe;
 }
 
 void handler_close()
@@ -156,12 +156,12 @@ int main(int argc, const char **argv)
 	}
 
 	funcs_init();
-	if(graphx_init() || initballs()) /* must load the bitmap(s) after graphic setup */
+	if(graphx_init() || initjets()) /* must load the bitmap(s) after graphic setup */
 		goto bail;
 
 	ret = lewp();
 
-	termballs();
+	termjets();
 bail:
 	allegro_exit();
 	return ret;

@@ -17,6 +17,7 @@ class PhyObj
 				double w, double h);
 		virtual ~PhyObj();
 
+		virtual void draw(BITMAP *buffer) = 0; // boom, virtual ,abstract class
 		void move(double xlim, double ylim);
 
 		/* accessor */

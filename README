@@ -1,0 +1,50 @@
+Protocol
+========
+
+All messages (except handshaking) begin with an integer, meaning client ID.
+
+
+Handshaking
+===========
+
+Client                       Server
+         --->
+    "CONN %s" % name
+
+
+         <---
+     "%d ACK" % ID
+
+OR
+
+         <---
+        "NACK %s" % optional_message
+
+
+obviously ACK means accept.
+ID is an integer for the client to identify itself and others with.
+
+
+General Messages
+================
+
+Client                      Server
+
+               <-----
+  "%d POS %lf %lf %lf %lf" % id, x, y, speed, heading
+
+(x, y), position, speed and heading of client id
+
+
+               ------>
+  "%d POS %lf %lf %lf %lf" % id, x, y, speed, heading
+
+(x, y), position, speed and heading of client id
+
+
+Notes
+=====
+
+%lf = long float = double
+
+ vim: ft=conf et
