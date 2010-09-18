@@ -8,9 +8,6 @@ class PhyObj
 					 _speed, _heading,
 					 _w, _h;
 
-		inline void getcomponents(double &, double &);
-		inline void setcomponents(double  , double  );
-
 	public:
 		PhyObj(double x, double y,
 				double speed, double heading,
@@ -18,11 +15,7 @@ class PhyObj
 		virtual ~PhyObj();
 
 		virtual void draw(BITMAP *buffer) = 0; // boom, virtual ,abstract class
-		void move(double xlim, double ylim);
-
-		/* accessor */
-		inline double x() { return _x; }
-		inline double y() { return _y; }
+		virtual void move(double xlim, double ylim);
 };
 
 #endif

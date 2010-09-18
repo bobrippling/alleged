@@ -1,4 +1,3 @@
-ball.o
-main.o
-netobj.o
-phyobj.o
+*.o
+client/test
+server/svr

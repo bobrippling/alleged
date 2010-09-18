@@ -7,14 +7,14 @@
 #include <allegro.h>
 #include <arpa/inet.h>
 
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH  800.0
+#define HEIGHT 600.0
 
 #define FRAME_DELAY 60
 #define Njets 5
 
 #define JET_FILE "img/jet.bmp"
-#define JET_SPEED 5.0f
+#define JET_SPEED 5.0
 
 #include "netobj.h"
 #include "phyobj.h"
@@ -43,6 +43,44 @@ void timerfunc(void)
 }
 END_OF_FUNCTION(timerfunc)
 
+
+inline void logic()
+{
+	jetMe->move(WIDTH, HEIGHT);
+
+	for(std::vector<Jet>::iterator it = jets.begin();
+			it != jets.end();
+			++it)
+		(*it).move(WIDTH, HEIGHT);
+}
+
+inline void proc_keys()
+{
+	if(key[KEY_W])
+		jetMe->thrust(true);
+	else
+		jetMe->thrust(false);
+
+	if(key[KEY_D])
+		jetMe->rotate_right();
+	else if(key[KEY_A])
+		jetMe->rotate_left();
+}
+
+inline void draw(BITMAP *buffer)
+{
+	jetMe->draw(buffer);
+
+	for(std::vector<Jet>::iterator it = jets.begin();
+			it != jets.end();
+			++it)
+		(*it).draw(buffer);
+
+
+	blit(buffer, screen, 0, 0, 0, 0, WIDTH, HEIGHT);
+	clear_bitmap(buffer);
+}
+
 int lewp(void)
 {
 	BITMAP *buffer = create_bitmap(WIDTH, HEIGHT); /* backbuffer */
@@ -50,38 +88,20 @@ int lewp(void)
 	clear_bitmap(buffer);
 	clear_bitmap(screen);
 
-	while(running && !key[KEY_Q]){
+	while(running && !key[KEY_ESC]){
 		/*
 		 * timer remains >0 while we're still in a frame
 		 * once the frame's time is up, timer <= 0
 		 */
 
 		while(timer > 0){
-			std::vector<Jet>::iterator it(jets.begin());
-
-			/* logic code */
-			jetMe->move(WIDTH, HEIGHT);
-
-			for(std::vector<Jet>::iterator it = jets.begin();
-					it != jets.end();
-					++it)
-				(*it).move(WIDTH, HEIGHT);
-
+			logic();
+			proc_keys();
 			timer--;
 		}
 
 
-		/* draw code */
-		jetMe->draw(buffer);
-
-		for(std::vector<Jet>::iterator it = jets.begin();
-				it != jets.end();
-				++it)
-			(*it).draw(buffer);
-
-
-		blit(buffer, screen, 0, 0, 0, 0, WIDTH, HEIGHT);
-		clear_bitmap(buffer);
+		draw(buffer);
 	}
 
 	destroy_bitmap(buffer);
@@ -102,8 +122,7 @@ int initjets()
 		return 1;
 	}
 
-	jetMe = new Jet(rand() % WIDTH, rand() % HEIGHT,
-			JET_SPEED, (rand() % 360) * M_PI/180, tmpbmp, makecol(0, 255, 0), NULL);
+	jetMe = new Jet(JET_SPEED, tmpbmp, NULL);
 
 	return 0;
 }
@@ -144,7 +163,7 @@ int graphx_init()
 	return 0;
 }
 
-int main(int argc, const char **argv)
+int main(void)
 {
 	int ret = 0;
 
