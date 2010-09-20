@@ -122,7 +122,9 @@ int initjets()
 		return 1;
 	}
 
-	jetMe = new Jet(JET_SPEED, tmpbmp, NULL);
+	//jetMe = new Jet(0/*JET_SPEED*/, tmpbmp, NULL);
+	jetMe = new Jet(WIDTH/2, HEIGHT/2, 0, 0, 0, tmpbmp,
+			makecol(0, 0, 0), NULL);
 
 	return 0;
 }
@@ -170,7 +172,7 @@ int main(void)
 	srand(time(NULL));
 
 	if(allegro_init()){
-		allegro_message("allegro_init(): %s", strerror(errno));
+		allegro_message("allegro_init() failed: %s\nIs $DISPLAY set?\n", strerror(errno));
 		return 1;
 	}
 

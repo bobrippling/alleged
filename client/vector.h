@@ -10,14 +10,21 @@ void addvectors(double *speed, double *heading,
 void clip(double *x, double *y, double *speed, double *heading,
 		double xlim, double ylim, double width, double height);
 
-// FIXME
-inline double clipangle(double a)
+inline double clampangle(double a)
 {
 	while(a < -M_PI)
-		a += M_2_PI;
+		a += 2 * M_PI;
 	while(a > M_PI)
-		a -= M_2_PI;
+		a -= 2 * M_PI;
+
 	return a;
 }
+
+#ifdef ALLEGRO_H
+inline fixed radtofix(double r)
+{
+	return ((int)(r * 128 / M_PI)) << 16;
+}
+#endif
 
 #endif

@@ -21,7 +21,6 @@ class Jet : public PhyObj, NetObj
 		double _facing;
 #endif
 
-
 	public:
 		// if addr is NULL, assumed to be localhost
 		Jet(double x, double y, double speed, double heading, double facing,

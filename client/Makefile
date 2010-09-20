@@ -13,3 +13,9 @@ clean: mostlyclean
 .PHONY: clean
 
 include ../config.mk
+
+jet.o: jet.cpp phyobj.h netobj.h vector.h jet.h
+main.o: main.cpp netobj.h phyobj.h jet.h
+netobj.o: netobj.cpp netobj.h
+phyobj.o: phyobj.cpp phyobj.h vector.h
+vector.o: vector.cpp vector.h

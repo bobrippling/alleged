@@ -18,7 +18,12 @@
 #define RAND_DEG()   (::rand() % 359)
 #define RAND_RAD()   TO_RAD(RAND_DEG())
 
-#define JET_ROTATE (M_PI_4/6)
+#if FACING_AS_FIXED
+# define JET_ROTATE 8
+#else
+# define JET_ROTATE (M_PI_4/6)
+#endif
+
 #define JET_ACCEL  1.0
 
 Jet::Jet(double speed, BITMAP *bmp, struct sockaddr_in *addr)
@@ -30,7 +35,7 @@ Jet::Jet(double speed, BITMAP *bmp, struct sockaddr_in *addr)
 		_thrust(false),
 #if FACING_AS_FIXED
 		_facing(ftofix(RAND_DEG())),
-		sensitivity(itofix(8))
+		sensitivity(itofix(JET_ROTATE))
 #else
 		_facing(RAND_RAD())
 #endif
@@ -66,21 +71,27 @@ Jet::~Jet()
 
 void Jet::draw(::BITMAP *buffer)
 {
+	double ptx = _x, pty = _y;
+
 #if FACING_AS_FIXED
 	::rotate_sprite(buffer, _bmp, _x, _y, _facing);
 #else
-	::rotate_sprite(buffer, _bmp, _x, _y, ftofix(TO_DEG(_facing)));
+	::rotate_sprite(buffer, _bmp, _x, _y, radtofix(_facing));
 #endif
+
+	applyvector(&ptx, &pty, 50, _facing);
+
+	// bmp, x1,y1, x2,y2, col
+	line(buffer, _x, _y, ptx, pty, makecol(255,255,255));
 }
 
 void Jet::move(double xlim, double ylim)
 {
 	PhyObj::move(xlim, ylim); // superclass funcall
 	if(_thrust){
-		// TODO
 #if FACING_AS_FIXED
+		// TODO
 #else
-		//::applyvector(&_x, &_y, 1, _facing);
 		::addvectors(&_speed, &_heading, JET_ACCEL, _facing);
 #endif
 	}
@@ -91,15 +102,12 @@ void Jet::thrust(bool on)
 	_thrust = on;
 }
 
-#define P() printf("facing: %f\n", TO_DEG(_facing))
-
 void Jet::rotate_right()
 {
 #if FACING_AS_FIXED
 	_facing += sensitivity;
 #else
-	_facing = clipangle(_facing + JET_ROTATE);
-	P();
+	_facing = clampangle(_facing + JET_ROTATE);
 #endif
 }
 
@@ -108,7 +116,6 @@ void Jet::rotate_left()
 #if FACING_AS_FIXED
 	_facing -= sensitivity;
 #else
-	_facing = clipangle(_facing - JET_ROTATE);
-	P();
+	_facing = clampangle(_facing - JET_ROTATE);
 #endif
 }
