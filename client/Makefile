@@ -3,7 +3,7 @@ LDFLAGS  += $(shell allegro-config --libs) -lm
 
 BIN       = test
 
-${BIN}: main.o phyobj.o netobj.o jet.o vector.o
+${BIN}: main.o phyobj.o netobj.o vector.o  jet.o bullet.o
 	$Qecho LD $@
 	$Q${CXX} ${LDFLAGS} -o $@ $^
 

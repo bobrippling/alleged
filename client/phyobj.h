@@ -14,7 +14,7 @@ class PhyObj
 				double w, double h);
 		virtual ~PhyObj();
 
-		virtual void draw(BITMAP *buffer) = 0; // boom, virtual ,abstract class
+		virtual void draw(BITMAP *buffer) const = 0; // boom, virtual ,abstract class
 		virtual void move(double xlim, double ylim);
 };
 

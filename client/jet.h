@@ -1,8 +1,6 @@
 #ifndef BALL_H
 #define BALL_H
 
-#define FACING_AS_FIXED 0
-
 class Jet : public PhyObj, NetObj
 {
 	private:
@@ -11,15 +9,10 @@ class Jet : public PhyObj, NetObj
 		int _col;
 
 		// movement
-		bool _thrust;
-#if FACING_AS_FIXED
-		fixed  _facing; // top-word: mantissa, bot-word: exponent
-
-		// 256 = full circle
-		const fixed sensitivity;
-#else
+		bool _thrust, _firing;
 		double _facing;
-#endif
+
+		long lastshot;
 
 	public:
 		// if addr is NULL, assumed to be localhost
@@ -30,13 +23,17 @@ class Jet : public PhyObj, NetObj
 		Jet(double speed, BITMAP *bmp, struct sockaddr_in *addr);
 		// ^ everything else randomised
 
-		~Jet();
+		virtual ~Jet();
 
-		virtual void draw(::BITMAP *);
+		virtual void draw(::BITMAP *) const;
 		void move(double xlim, double ylim); // override
 
 		void thrust(bool on);
 		void rotate_right(), rotate_left();
+
+		Bullet *createbullet();
+		inline void setfiring(bool on){ _firing = on; }
+		bool canfire();
 };
 
 #endif

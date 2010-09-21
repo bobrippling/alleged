@@ -5,11 +5,16 @@
 #include <allegro.h>
 #include <arpa/inet.h>
 
+// class defs
 #include "phyobj.h"
 #include "netobj.h"
 
+// helpers
+#include "time.h"
 #include "vector.h"
 
+// more class defs
+#include "bullet.h"
 #include "jet.h"
 
 #define TO_DEG(x)    ((x) * 180/M_PI)
@@ -18,13 +23,11 @@
 #define RAND_DEG()   (::rand() % 359)
 #define RAND_RAD()   TO_RAD(RAND_DEG())
 
-#if FACING_AS_FIXED
-# define JET_ROTATE 8
-#else
-# define JET_ROTATE (M_PI_4/6)
-#endif
-
-#define JET_ACCEL  1.0
+// TODO: class cfg
+#define JET_ROTATE   (M_PI_4/6)
+#define JET_ACCEL    0.02
+#define BULLET_SPEED 0.04
+#define SHOT_DELAY   80
 
 Jet::Jet(double speed, BITMAP *bmp, struct sockaddr_in *addr)
 
@@ -33,12 +36,8 @@ Jet::Jet(double speed, BITMAP *bmp, struct sockaddr_in *addr)
 		_bmp(bmp),
 		_col(makecol(0, 255, 0)),
 		_thrust(false),
-#if FACING_AS_FIXED
-		_facing(ftofix(RAND_DEG())),
-		sensitivity(itofix(JET_ROTATE))
-#else
-		_facing(RAND_RAD())
-#endif
+		_facing(RAND_RAD()),
+		lastshot(time_now())
 {
 }
 
@@ -55,12 +54,8 @@ Jet::Jet(
 		_bmp(bmp),
 		_col(col),
 		_thrust(false),
-#if FACING_AS_FIXED
-		_facing(ftofix(TO_DEG(facing))),
-		sensitivity(itofix(8))
-#else
-		_facing(facing)
-#endif
+		_facing(facing),
+		lastshot(time_now())
 {
 }
 
@@ -69,15 +64,11 @@ Jet::~Jet()
 	destroy_bitmap(_bmp);
 }
 
-void Jet::draw(::BITMAP *buffer)
+void Jet::draw(::BITMAP *buffer) const
 {
 	double ptx = _x, pty = _y;
 
-#if FACING_AS_FIXED
-	::rotate_sprite(buffer, _bmp, _x, _y, _facing);
-#else
 	::rotate_sprite(buffer, _bmp, _x, _y, radtofix(_facing));
-#endif
 
 	applyvector(&ptx, &pty, 50, _facing);
 
@@ -87,14 +78,12 @@ void Jet::draw(::BITMAP *buffer)
 
 void Jet::move(double xlim, double ylim)
 {
+	// called every frame
+	//
 	PhyObj::move(xlim, ylim); // superclass funcall
-	if(_thrust){
-#if FACING_AS_FIXED
-		// TODO
-#else
+
+	if(_thrust)
 		::addvectors(&_speed, &_heading, JET_ACCEL, _facing);
-#endif
-	}
 }
 
 void Jet::thrust(bool on)
@@ -104,18 +93,27 @@ void Jet::thrust(bool on)
 
 void Jet::rotate_right()
 {
-#if FACING_AS_FIXED
-	_facing += sensitivity;
-#else
 	_facing = clampangle(_facing + JET_ROTATE);
-#endif
 }
 
 void Jet::rotate_left()
 {
-#if FACING_AS_FIXED
-	_facing -= sensitivity;
-#else
 	_facing = clampangle(_facing - JET_ROTATE);
-#endif
+}
+
+bool Jet::canfire()
+{
+	long now = ::time_now();
+
+	if(now - lastshot > SHOT_DELAY){
+		lastshot = now;
+		return true;
+	}
+	return false;
+}
+
+Bullet *Jet::createbullet()
+{
+	return new Bullet(_x, _y, BULLET_SPEED /* TODO: per-ship */,
+			_heading, _col); // FIXME - speed
 }

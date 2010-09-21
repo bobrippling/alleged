@@ -11,18 +11,19 @@
 #define HEIGHT 600.0
 
 #define FRAME_DELAY 60
-#define Njets 5
 
-#define JET_FILE "img/jet.bmp"
-#define JET_SPEED 5.0
+#define JET_FILE     "img/jet.bmp"
 
 #include "netobj.h"
 #include "phyobj.h"
+#include "bullet.h"
 #include "jet.h"
 
+std::vector<PhyObj *> phyobjs;
 
 Jet *jetMe;
-std::vector<Jet> jets;
+std::vector<Jet *>    jets;
+std::vector<Bullet *> bullets;
 
 bool running = true;
 volatile long timer = 0; /* fps business */
@@ -44,15 +45,34 @@ void timerfunc(void)
 END_OF_FUNCTION(timerfunc)
 
 
+inline void checkfiring(Jet *j)
+{
+	if(j->canfire()){
+		Bullet *b = j->createbullet();
+		bullets.push_back(b);
+		phyobjs.push_back(b);
+	}
+}
+
+
 inline void logic()
 {
 	jetMe->move(WIDTH, HEIGHT);
 
-	for(std::vector<Jet>::iterator it = jets.begin();
+	for(std::vector<PhyObj *>::iterator it = phyobjs.begin();
+			it != phyobjs.end();
+			++it)
+		(*it)->move(WIDTH, HEIGHT);
+
+	// special case
+	for(std::vector<Jet *>::iterator it = jets.begin();
 			it != jets.end();
 			++it)
-		(*it).move(WIDTH, HEIGHT);
+		checkfiring(*it);
+
+	checkfiring(jetMe);
 }
+
 
 inline void proc_keys()
 {
@@ -61,25 +81,31 @@ inline void proc_keys()
 	else
 		jetMe->thrust(false);
 
+	if(key[KEY_SPACE])
+		jetMe->setfiring(true);
+	else
+		jetMe->setfiring(false);
+
 	if(key[KEY_D])
 		jetMe->rotate_right();
 	else if(key[KEY_A])
 		jetMe->rotate_left();
 }
 
+
 inline void draw(BITMAP *buffer)
 {
 	jetMe->draw(buffer);
 
-	for(std::vector<Jet>::iterator it = jets.begin();
-			it != jets.end();
+	for(std::vector<PhyObj *>::iterator it = phyobjs.begin();
+			it != phyobjs.end();
 			++it)
-		(*it).draw(buffer);
-
+		(*it)->draw(buffer);
 
 	blit(buffer, screen, 0, 0, 0, 0, WIDTH, HEIGHT);
 	clear_bitmap(buffer);
 }
+
 
 int lewp(void)
 {
@@ -100,13 +126,13 @@ int lewp(void)
 			timer--;
 		}
 
-
 		draw(buffer);
 	}
 
 	destroy_bitmap(buffer);
 	return 0;
 }
+
 
 int initjets()
 {
@@ -124,21 +150,26 @@ int initjets()
 
 	//jetMe = new Jet(0/*JET_SPEED*/, tmpbmp, NULL);
 	jetMe = new Jet(WIDTH/2, HEIGHT/2, 0, 0, 0, tmpbmp,
-			makecol(0, 0, 0), NULL);
+			makecol(255, 0, 0), NULL);
+
+	phyobjs.push_back(jetMe);
 
 	return 0;
 }
+
 
 void termjets()
 {
 	delete jetMe;
 }
 
+
 void handler_close()
 {
 	running = false;
 }
 END_OF_FUNCTION(timerfunc)
+
 
 void funcs_init()
 {
@@ -155,6 +186,7 @@ void funcs_init()
 	set_close_button_callback(&handler_close);
 }
 
+
 int graphx_init()
 {
 	set_color_depth(16);
@@ -164,6 +196,7 @@ int graphx_init()
 	}
 	return 0;
 }
+
 
 int main(void)
 {
