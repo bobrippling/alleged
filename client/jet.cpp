@@ -26,8 +26,8 @@
 // TODO: class cfg
 #define JET_ROTATE   (M_PI_4/6)
 #define JET_ACCEL    0.02
-#define BULLET_SPEED 0.04
-#define SHOT_DELAY   80
+#define BULLET_SPEED 10
+#define SHOT_DELAY   100
 
 Jet::Jet(double speed, BITMAP *bmp, struct sockaddr_in *addr)
 
@@ -36,8 +36,9 @@ Jet::Jet(double speed, BITMAP *bmp, struct sockaddr_in *addr)
 		_bmp(bmp),
 		_col(makecol(0, 255, 0)),
 		_thrust(false),
+		_firing(false),
 		_facing(RAND_RAD()),
-		lastshot(time_now())
+		_lastshot(time_now())
 {
 }
 
@@ -54,8 +55,9 @@ Jet::Jet(
 		_bmp(bmp),
 		_col(col),
 		_thrust(false),
+		_firing(false),
 		_facing(facing),
-		lastshot(time_now())
+		_lastshot(time_now())
 {
 }
 
@@ -103,17 +105,19 @@ void Jet::rotate_left()
 
 bool Jet::canfire()
 {
-	long now = ::time_now();
+	if(_firing){
+		long now = ::time_now();
 
-	if(now - lastshot > SHOT_DELAY){
-		lastshot = now;
-		return true;
+		if(now - _lastshot > SHOT_DELAY){
+			_lastshot = now;
+			return true;
+		}
 	}
 	return false;
 }
 
 Bullet *Jet::createbullet()
 {
-	return new Bullet(_x, _y, BULLET_SPEED /* TODO: per-ship */,
-			_heading, _col); // FIXME - speed
+	return new Bullet(_x + _w/2, _y + _h/2, BULLET_SPEED /* TODO: per-ship */,
+			_facing, _col); // FIXME - speed
 }

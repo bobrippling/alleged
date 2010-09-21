@@ -14,8 +14,9 @@ clean: mostlyclean
 
 include ../config.mk
 
-jet.o: jet.cpp phyobj.h netobj.h vector.h jet.h
-main.o: main.cpp netobj.h phyobj.h jet.h
+bullet.o: bullet.cpp phyobj.h bullet.h
+jet.o: jet.cpp phyobj.h netobj.h time.h vector.h bullet.h jet.h
+main.o: main.cpp netobj.h phyobj.h bullet.h jet.h
 netobj.o: netobj.cpp netobj.h
 phyobj.o: phyobj.cpp phyobj.h vector.h
 vector.o: vector.cpp vector.h

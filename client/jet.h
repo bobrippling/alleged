@@ -12,7 +12,7 @@ class Jet : public PhyObj, NetObj
 		bool _thrust, _firing;
 		double _facing;
 
-		long lastshot;
+		long _lastshot;
 
 	public:
 		// if addr is NULL, assumed to be localhost

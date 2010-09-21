@@ -5,6 +5,7 @@ class Bullet : public PhyObj
 {
 	private:
 		int _col;
+		long _maketime;
 
 	public:
 		Bullet(double x, double y,
@@ -12,6 +13,7 @@ class Bullet : public PhyObj
 		virtual ~Bullet();
 
 		virtual void draw(BITMAP *) const;
+		virtual bool expired()      const;
 };
 
 #endif

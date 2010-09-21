@@ -54,27 +54,60 @@ inline void checkfiring(Jet *j)
 	}
 }
 
-
-inline void logic()
+void phyobjs_remove(PhyObj *p)
 {
-	jetMe->move(WIDTH, HEIGHT);
-
 	for(std::vector<PhyObj *>::iterator it = phyobjs.begin();
 			it != phyobjs.end();
 			++it)
-		(*it)->move(WIDTH, HEIGHT);
+		if(*it == p){
+			phyobjs.erase(it);
+			return;
+		}
+}
 
-	// special case
-	for(std::vector<Jet *>::iterator it = jets.begin();
-			it != jets.end();
-			++it)
-		checkfiring(*it);
+void logic()
+{
+	std::vector<Jet    *>::iterator jit;
+	std::vector<Bullet *>::iterator bit;
 
+	jetMe->move(WIDTH, HEIGHT);
 	checkfiring(jetMe);
+
+	/*
+	 * don't bother with iterator<PhyObj *>,
+	 * since both jet & bullet have special cases
+	 */
+	for(jit = jets.begin(); !jets.empty() && jit != jets.end(); ++jit){
+		(*jit)->move(WIDTH, HEIGHT);
+		checkfiring(*jit);
+	}
+
+	for(bit = bullets.begin(); !bullets.empty() && bit != bullets.end(); ++bit){
+		(*bit)->move(WIDTH, HEIGHT);
+		if((*bit)->expired()){
+			phyobjs_remove(*bit);
+			delete *bit;
+			bullets.erase(bit);
+		}
+	}
 }
 
 
-inline void proc_keys()
+void draw(BITMAP *buffer)
+{
+	std::vector<PhyObj *>::iterator it;
+
+	jetMe->draw(buffer);
+
+	for(it = phyobjs.begin(); !phyobjs.empty() && it != phyobjs.end(); ++it)
+		(*it)->draw(buffer);
+
+	blit(buffer, screen, 0, 0, 0, 0, WIDTH, HEIGHT);
+	clear_bitmap(buffer);
+}
+
+
+void proc_keys()
 {
 	if(key[KEY_W])
 		jetMe->thrust(true);
@@ -90,20 +123,6 @@ inline void proc_keys()
 		jetMe->rotate_right();
 	else if(key[KEY_A])
 		jetMe->rotate_left();
-}
-
-
-inline void draw(BITMAP *buffer)
-{
-	jetMe->draw(buffer);
-
-	for(std::vector<PhyObj *>::iterator it = phyobjs.begin();
-			it != phyobjs.end();
-			++it)
-		(*it)->draw(buffer);
-
-	blit(buffer, screen, 0, 0, 0, 0, WIDTH, HEIGHT);
-	clear_bitmap(buffer);
 }
 
 
@@ -151,8 +170,6 @@ int initjets()
 	//jetMe = new Jet(0/*JET_SPEED*/, tmpbmp, NULL);
 	jetMe = new Jet(WIDTH/2, HEIGHT/2, 0, 0, 0, tmpbmp,
 			makecol(255, 0, 0), NULL);
-
-	phyobjs.push_back(jetMe);
 
 	return 0;
 }
