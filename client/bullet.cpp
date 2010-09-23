@@ -5,8 +5,8 @@
 
 #include "bullet.h"
 
-#define BULLET_RADIUS  5
-#define BULLET_TIMEOUT 1500
+#define BULLET_RADIUS  1
+#define BULLET_TIMEOUT 3500
 
 Bullet::Bullet(double x, double y, double speed, double heading, int col)
 	: PhyObj(x, y, speed, heading, BULLET_RADIUS, BULLET_RADIUS),
