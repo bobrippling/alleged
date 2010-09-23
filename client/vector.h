@@ -13,8 +13,8 @@ void addvectors(double *speed, double *heading,
  * width, height are the obj's stats
  */
 void clip(double *x, double *y, double *speed, double *heading,
-		double xmin, double ymin, double xmax, double ymax,
-		double width, double height);
+		double width, double height,
+		double xmax, double ymax, double xmin = 0, double ymin = 0);
 
 inline double clampangle(double a)
 {

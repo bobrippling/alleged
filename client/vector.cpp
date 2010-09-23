@@ -31,8 +31,10 @@ void addvectors(double *speed, double *heading, double thrust, double dir)
 }
 
 void clip(double *x, double *y, double *speed, double *heading,
-		double xmin, double ymin, double xmax, double ymax,
-		double width, double height)
+		double width, double height,
+		double xmax, double ymax,
+		// optional below
+		double xmin, double ymin)
 {
 	double xcomp, ycomp;
 	bool gotcomps = false;

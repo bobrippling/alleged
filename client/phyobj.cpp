@@ -20,5 +20,6 @@ void PhyObj::move(double xlim, double ylim)
 {
 	::applyvector(&_x, &_y, _speed, _heading);
 
-	::clip(&_x, &_y, &_speed, &_heading, xlim, ylim, _w, _h);
+	::clip(&_x, &_y, &_speed, &_heading,
+			_w, _h, xlim, ylim);
 }
