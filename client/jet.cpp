@@ -26,7 +26,7 @@
 // TODO: class cfg
 #define JET_ROTATE   (M_PI_4/6)
 #define JET_ACCEL    0.02
-#define BULLET_SPEED 10
+#define BULLET_SPEED 2
 #define SHOT_DELAY   100
 
 Jet::Jet(double speed, BITMAP *bmp, struct sockaddr_in *addr)
@@ -68,14 +68,7 @@ Jet::~Jet()
 
 void Jet::draw(::BITMAP *buffer) const
 {
-	double ptx = _x, pty = _y;
-
 	::rotate_sprite(buffer, _bmp, _x, _y, radtofix(_facing));
-
-	applyvector(&ptx, &pty, 50, _facing);
-
-	// bmp, x1,y1, x2,y2, col
-	line(buffer, _x, _y, ptx, pty, makecol(255,255,255));
 }
 
 void Jet::move(double xlim, double ylim)
@@ -118,6 +111,9 @@ bool Jet::canfire()
 
 Bullet *Jet::createbullet()
 {
-	return new Bullet(_x + _w/2, _y + _h/2, BULLET_SPEED /* TODO: per-ship */,
-			_facing, _col); // FIXME - speed
+	double speed = _speed, heading = _heading;
+
+	addvectors(&speed, &heading, BULLET_SPEED, _facing);
+
+	return new Bullet(_x + _w/2, _y + _h/2, speed, heading, _col);
 }
