@@ -185,7 +185,7 @@ void handler_close()
 {
 	running = false;
 }
-END_OF_FUNCTION(timerfunc)
+END_OF_FUNCTION(handler_close)
 
 
 void funcs_init()
