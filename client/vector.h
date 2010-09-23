@@ -7,8 +7,14 @@ void applyvector(double *x, double *y,
 void addvectors(double *speed, double *heading,
 		double thrust, double dir);
 
+/*
+ * obj's x, y, speed & heading
+ * {x,y}{min,max} are the container's stats
+ * width, height are the obj's stats
+ */
 void clip(double *x, double *y, double *speed, double *heading,
-		double xlim, double ylim, double width, double height);
+		double xmin, double ymin, double xmax, double ymax,
+		double width, double height);
 
 inline double clampangle(double a)
 {

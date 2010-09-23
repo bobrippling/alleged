@@ -31,28 +31,29 @@ void addvectors(double *speed, double *heading, double thrust, double dir)
 }
 
 void clip(double *x, double *y, double *speed, double *heading,
-		double xlim, double ylim, double width, double height)
+		double xmin, double ymin, double xmax, double ymax,
+		double width, double height)
 {
 	double xcomp, ycomp;
 	bool gotcomps = false;
 
-	if(*y < 0 || *y + height > ylim){
+	if(*y < ymin || *y + height > ymax){
 		getcomponents(&xcomp, &ycomp, *speed, *heading);
 		gotcomps = true;
 
-		if(*y < 0)
+		if(*y < ymin)
 			ycomp =  ::fabs(ycomp);
 		else
 			ycomp = -::fabs(ycomp);
 	}
 
-	if(*x < 0 || *x + width > xlim){
+	if(*x < xmin || *x + width > xmax){
 		if(!gotcomps){
 			getcomponents(&xcomp, &ycomp, *speed, *heading);
 			gotcomps = true;
 		}
 
-		if(*x < 0)
+		if(*x < xmin)
 			xcomp =  ::fabs(xcomp);
 		else
 			xcomp = -::fabs(xcomp);
