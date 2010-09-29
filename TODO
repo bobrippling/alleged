@@ -1,4 +1,6 @@
+http://www.lazyfoo.net/SDL_tutorials/
 allegro datafiles
+
 bouncing ball + gravity
 int nbuttons = install_mouse();
 
